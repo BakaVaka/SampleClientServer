@@ -1,13 +1,20 @@
-﻿using Server;
+﻿using System.Diagnostics;
+
+using Server;
 
 using Shared;
 using Shared.Messages;
 
-var xmlChannel = new XmlChannel();
+using SimpleServer;
 
 var application = new NetworkApplicationBuilder()
     .Use(async (connection, next, ct) => {
+        if(next is null) {
+            // todo add diagnostic message
+            return;
+        }
         try{
+            Console.WriteLine("Connected");
             await next(connection, ct);
         }
         catch(Exception ex){
@@ -26,15 +33,17 @@ var server = new ServerBase(settings);
 
 using var cts = new CancellationTokenSource();
 
+var observer = new DiagnosticObserver();
+IDisposable subscription = DiagnosticListener.AllListeners.Subscribe(observer);
+
 Console.CancelKeyPress += (_, _) => { cts.Cancel(); };
-Console.WriteLine("Press [Ctrl+c] to stop server");
+
 await server.Run(cts.Token);
-Console.WriteLine("Server is stopped now");
 
 async Task ConnectionHandler(Connection connection, CancellationToken cancellationToken = default) {
 
     while( !cancellationToken.IsCancellationRequested ) {
-        var message = await connection.Receive(xmlChannel.Decode);
+        var message = await connection.Receive(XmlChannel.Decode);
         if( message is MathOperationRequestMessage mathRequest ) {
             switch( mathRequest.Method ) {
                 case "SUM": {
@@ -42,12 +51,12 @@ async Task ConnectionHandler(Connection connection, CancellationToken cancellati
                             Status = "OK",
                             Result = mathRequest.Operands.Sum()
                         };
-                        await connection.Send<Message>(response, xmlChannel.Encode);
+                        await connection.Send<Message>(response, XmlChannel.Encode);
                         break;
                     }
                 default: {
                         var response = new NotSupportedOperationMessage();
-                        await connection.Send<Message>(response, xmlChannel.Encode);
+                        await connection.Send<Message>(response, XmlChannel.Encode);
                         break;
                     }
             }

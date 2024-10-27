@@ -5,10 +5,6 @@ using Shared;
 
 namespace Server;
 
-/*
- * Класс "слушателя"
- * Принимает входящее соединение и выполняет "приложение" над подключением
- */
 public sealed class Listener {
 
     private Socket? _server;
@@ -33,25 +29,32 @@ public sealed class Listener {
             try {
                 
                 var client = await _server!.AcceptAsync(cancellationToken);
-                if( client != null ) {
+                Diagnostic.ClientAccepted(client);
+                if( client is not null ) {
                     var connection = Connection.Connect(client);
+
                     ThreadPool.UnsafeQueueUserWorkItem(async (state) => {
-                        var connection = state as Connection;
+                        var connection = state;
                         try {
                             await application(connection, cancellationToken);
                         }
-                        catch(Exception ex) { Console.Error.WriteLine($"{ex}"); }
+                        catch(Exception ex) {
+                            Diagnostic.Error(ex);
+                            Console.Error.WriteLine($"{ex}"); 
+                        }
                         try {
                             if(connection is not null ) {
                                 await connection.DisposeAsync();
                             }
                         }
-                        catch(Exception ex) { }
-                    }, connection);
+                        catch(Exception ex) {
+                            Diagnostic.Error(ex);
+                        }
+                    }, connection, false);
                 }
             }
             // do nothing, this is server call stop
-            catch( OperationCanceledException ) {}
+            catch( OperationCanceledException ) { }
         }
         // если нам нужен "рестарт" и мы хотим переиспользовать объект слушаетля
         _server?.Dispose();

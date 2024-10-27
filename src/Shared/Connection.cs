@@ -3,16 +3,15 @@ using System.Net.Sockets;
 
 namespace Shared;
 
-/**
- * Класс соединения
- * Используется как клиентом, так и сервером
- */
 public sealed class Connection : IDisposable, IAsyncDisposable {
 
     private readonly NetworkStream _stream;
     private Connection(Socket connection) {
         _stream = new NetworkStream(connection, true);
+        Name = "";
     }
+
+    public string Name { get; set; }
 
     public EndPoint? LocalEndPoint => _stream.Socket.LocalEndPoint;
     public EndPoint? RemoteEndPoint => _stream.Socket.RemoteEndPoint;
@@ -33,14 +32,10 @@ public sealed class Connection : IDisposable, IAsyncDisposable {
     public static Connection Connect(Socket socket) => new Connection(socket);
 
     public Task<T> Receive<T>(Func<Stream, CancellationToken, Task<T>> decoder, CancellationToken cancellationToken = default) {
-        // собственно, т.к. мы не знаем пока что что хотим получать
-        // нам нужен фильтр который будет из потока байт возвращать сообщение
         return decoder(_stream, cancellationToken);
     }
 
     public async Task Send<T>(T message, Func<T, ReadOnlyMemory<byte>> encoder) {
-        // аналогично методу receive соединение не знает что там будут отправлять
-        // но мы хотим отправлять объектики, а потому - 
         var bytes = encoder(message);
         await _stream.WriteAsync(bytes);
     }

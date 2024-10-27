@@ -1,0 +1,17 @@
+[
+  {
+    "Name": "ClientAndServer",
+    "Projects": [
+      {
+        "Name": "src\\SimpleServer\\SimpleServer.csproj",
+        "Action": "Start",
+        "DebugTarget": "SimpleServer"
+      },
+      {
+        "Name": "src\\SimpleClient\\SimpleClient.csproj",
+        "Action": "Start",
+        "DebugTarget": "SimpleClient"
+      }
+    ]
+  }
+]

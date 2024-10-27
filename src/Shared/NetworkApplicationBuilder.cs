@@ -1,12 +1,12 @@
 ﻿namespace Shared;
 
 public delegate Task ConnectionHandlerDelegate(Connection connection, CancellationToken cancellationToken);
-public delegate Task ConnectionHandlerPipleineDelegate(Connection connection, ConnectionHandlerDelegate next = null, CancellationToken cancellationToken = default);
+public delegate Task ConnectionHandlerPipelineDelegate(Connection connection, ConnectionHandlerDelegate? next = null, CancellationToken cancellationToken = default);
 
 // простой билдер приложения
 public sealed class NetworkApplicationBuilder {
 
-    private List<ConnectionHandlerPipleineDelegate> _handlers = new();
+    private List<ConnectionHandlerPipelineDelegate> _handlers = new();
 
     public NetworkApplicationBuilder Use(ConnectionHandlerDelegate middleware) {
         _handlers.Add(async (connection, next, ct) => {
@@ -18,7 +18,7 @@ public sealed class NetworkApplicationBuilder {
         return this;
     }
 
-    public NetworkApplicationBuilder Use(ConnectionHandlerPipleineDelegate middleware) {
+    public NetworkApplicationBuilder Use(ConnectionHandlerPipelineDelegate middleware) {
         _handlers.Add(middleware);
         return this;
     }
@@ -29,7 +29,7 @@ public sealed class NetworkApplicationBuilder {
             return Task.CompletedTask;
         };
 
-        handler = _handlers.Reverse<ConnectionHandlerPipleineDelegate>().Aggregate(handler, (acc, next) => {
+        handler = _handlers.Reverse<ConnectionHandlerPipelineDelegate>().Aggregate(handler, (acc, next) => {
             return async (Connection c, CancellationToken ct) => {
                 await next(c, acc, ct);
             };

@@ -4,13 +4,14 @@ using System.Net;
 using Shared;
 using Shared.Messages;
 
-
-var xmlChannel = new XmlChannel();
-
 var application = new NetworkApplicationBuilder()
-    .Use(async (c, n, ct) => {
+    .Use(async (c, next, ct) => {
+        if(next is null){
+            // todo add diagnostic message;
+            return;
+        }
         try{
-            await n(c,ct);
+            await next(c,ct);
         }catch(Exception ex){
             Console.Error.WriteLine(ex.Message);
         }
@@ -36,12 +37,13 @@ var application = new NetworkApplicationBuilder()
                 Method = operation switch{
                     1 => "SUM",
                     2 => "MAX",
-                    3 => "MIN"
+                    3 => "MIN",
+                    _ => throw new UnsupportedException()
                 },
                 Operands = operands.ToArray()
-            }, xmlChannel.Encode);
+            }, XmlChannel.Encode);
 
-            var response = await con.Receive(xmlChannel.Decode);
+            var response = await con.Receive(XmlChannel.Decode);
 
             if(response is MathOperationResponseMessage mathOperationResponse){
                 Console.WriteLine($"Result is : {mathOperationResponse.Result}");
@@ -52,13 +54,16 @@ var application = new NetworkApplicationBuilder()
         }
     })
     .Build();
-Connection clientConnection = null;
+
+Connection clientConnection = null!;
 do {
     try {
         Console.WriteLine("Try connect to server");
         var connection = await Connection.ConnectAsync(IPEndPoint.Parse("127.0.0.1:8888"));
         clientConnection = connection;
-    }catch(Exception ex ) { }
+    }catch(Exception ex ) { 
+        Console.Error.WriteLine(ex.ToString());
+    }
     await Task.Delay(1000);
 } while( clientConnection is null );
 
