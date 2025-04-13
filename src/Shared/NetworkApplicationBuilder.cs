@@ -3,7 +3,6 @@
 public delegate Task ConnectionHandlerDelegate(Connection connection, CancellationToken cancellationToken);
 public delegate Task ConnectionHandlerPipelineDelegate(Connection connection, ConnectionHandlerDelegate? next = null, CancellationToken cancellationToken = default);
 
-// простой билдер приложения
 public sealed class NetworkApplicationBuilder {
 
     private List<ConnectionHandlerPipelineDelegate> _handlers = new();

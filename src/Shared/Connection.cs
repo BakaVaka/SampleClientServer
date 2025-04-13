@@ -8,7 +8,7 @@ public sealed class Connection : IDisposable, IAsyncDisposable {
     private readonly NetworkStream _stream;
     private Connection(Socket connection) {
         _stream = new NetworkStream(connection, true);
-        Name = "";
+        Name = NameGenerator.Generate();
     }
 
     public string Name { get; set; }

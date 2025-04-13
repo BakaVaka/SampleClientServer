@@ -14,7 +14,7 @@ var application = new NetworkApplicationBuilder()
             return;
         }
         try{
-            Console.WriteLine("Connected");
+            Console.WriteLine($"{connection.Name} - Connected");
             await next(connection, ct);
         }
         catch(Exception ex){
