@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:bProxyClient.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="250"
+             x:Class="bProxyClient.Views.MainView"
+             x:DataType="vm:MainViewModel">
+  <Design.DataContext>
+    <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+    <vm:MainViewModel />
+  </Design.DataContext>
+
+	<Grid VerticalAlignment="Stretch" RowDefinitions="*, Auto">
+
+		<StackPanel VerticalAlignment="Center">
+			<TextBox Width="400" Margin="0 5" Watermark="IP address" Text="{Binding IpAddress}"/>
+			<TextBox Width="400" Margin="0 5" Watermark="Port" Text="{Binding Port}"/>
+			<Separator Margin="10 15"/>
+			<Button HorizontalAlignment="Center">Connect</Button>
+		</StackPanel>
+		<Grid Grid.Row="1">
+
+			<Grid ColumnDefinitions="Auto, Auto" VerticalAlignment="Center">
+				<Label Grid.Column="0" VerticalAlignment="Center">Status :</Label>
+				<Label Grid.Column="1" VerticalAlignment="Center" Content="{Binding ConnectionStatus}"/>
+			</Grid>
+			
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+			<Button>Config</Button>
+			<Button>Log</Button>
+			<Button>?</Button>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</UserControl>

@@ -28,8 +28,8 @@ var application = new NetworkApplicationBuilder()
     .Use(ConnectionHandler)
     .Build();
 
-var settings = new ServerBase.Settings(application, 8888);
-var server = new ServerBase(settings);
+var settings = new TcpServerSettings(application, 8888);
+var server = new TcpServer(settings);
 
 using var cts = new CancellationTokenSource();
 

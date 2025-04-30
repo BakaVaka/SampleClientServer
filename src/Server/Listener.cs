@@ -36,6 +36,7 @@ public sealed class Listener {
                     ThreadPool.UnsafeQueueUserWorkItem(async (state) => {
                         var connection = state;
                         try {
+                            Diagnostic.ClientApplicationStarted(connection);
                             await application(connection, cancellationToken);
                         }
                         catch(Exception ex) {
@@ -56,7 +57,7 @@ public sealed class Listener {
             // do nothing, this is server call stop
             catch( OperationCanceledException ) { }
         }
-        // если нам нужен "рестарт" и мы хотим переиспользовать объект слушаетля
+        // если нам нужен "рестарт" и мы хотим переиспользовать объект слушателя
         _server?.Dispose();
         _server = null;
     }
